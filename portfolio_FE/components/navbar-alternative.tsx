@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Sparkles, User, UserPlus, Menu } from "lucide-react"
 import { useState } from "react"
+import Link from "next/link"
 
 export function NavbarAlternative() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -47,14 +48,16 @@ export function NavbarAlternative() {
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hidden sm:flex hover:bg-accent/50"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
+            <Link href="/dashboard">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hidden sm:flex hover:bg-accent/50"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            </Link>
             <Button 
               size="sm" 
               className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"

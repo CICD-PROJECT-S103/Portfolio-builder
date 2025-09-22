@@ -146,3 +146,13 @@
     background: var(--muted-foreground);
   }
 }
+
+/* Custom scrollbar utilities */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* WebKit */
+}

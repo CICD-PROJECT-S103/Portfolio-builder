@@ -36,10 +36,12 @@ export function Navbar() {
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button variant="ghost" size="sm" className="hidden sm:flex">
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm" className="hidden sm:flex">
+                <User className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            </Link>
             <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
               <UserPlus className="w-4 h-4 mr-2" />
               Sign Up
