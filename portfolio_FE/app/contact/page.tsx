@@ -92,7 +92,7 @@ export default function ContactUs() {
                 <Mail className="w-5 h-5 text-primary mt-1" />
                 <div>
                   <h3 className="font-semibold">Email</h3>
-                  <p className="text-muted-foreground">support@portfoliocraft.com</p>
+                  <p className="text-muted-foreground">2300030442@kluniversity</p>
                   <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default function ContactUs() {
                 <Phone className="w-5 h-5 text-primary mt-1" />
                 <div>
                   <h3 className="font-semibold">Phone</h3>
-                  <p className="text-muted-foreground">+1 (555) 012-3456</p>
+                  <p className="text-muted-foreground">+91 9876543210</p>
                   <p className="text-sm text-muted-foreground">Mon-Fri, 9AM-6PM PST</p>
                 </div>
               </div>
