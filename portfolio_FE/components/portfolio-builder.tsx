@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { User, Briefcase, Code, FileText, Eye, Palette, Monitor, Settings, Plus, X } from "lucide-react"
+import { User, Briefcase, Code, FileText, Eye, Palette, Monitor, Settings, Plus, X, CheckCircle, AlertCircle, Circle, Zap } from "lucide-react"
 import { ModernTemplate } from "../components/portfolio-templates/modern-template"
 import { MinimalTemplate } from "../components/portfolio-templates/minimal-template"
 import { CreativeTemplate } from "../components/portfolio-templates/creative-template"
@@ -66,6 +66,8 @@ export function PortfolioBuilder() {
   const [isExporting, setIsExporting] = useState(false)
   const [exportComplete, setExportComplete] = useState(false)
   const [exportType, setExportType] = useState<"download" | "deploy" | null>(null)
+  const [portfolioUrl, setPortfolioUrl] = useState<string>("")
+  const [isCompleted, setIsCompleted] = useState(false)
   const [customization, setCustomization] = useState<TemplateCustomization>({
     colorScheme: "default",
     fontFamily: "inter",
@@ -348,13 +350,15 @@ This portfolio uses the ${selectedTemplateData?.name} template.
   const resetExport = () => {
     setExportComplete(false)
     setExportType(null)
+    setPortfolioUrl("")
+    setIsCompleted(false)
   }
 
   const renderExperienceStep = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Work Experience</h3>
-        <Button onClick={addExperience} variant="outline" size="sm">
+        <Button onClick={addExperience} variant="secondary" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
           <Plus className="w-4 h-4 mr-2" />
           Add Experience
         </Button>
@@ -419,7 +423,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Projects</h3>
-        <Button onClick={addProject} variant="outline" size="sm">
+        <Button onClick={addProject} variant="secondary" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
           <Plus className="w-4 h-4 mr-2" />
           Add Project
         </Button>
@@ -520,7 +524,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
             placeholder="Add a skill (e.g., JavaScript, React, Python)"
             onKeyPress={(e) => e.key === "Enter" && addSkill()}
           />
-          <Button onClick={addSkill} variant="outline">
+          <Button onClick={addSkill} variant="secondary" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
             <Plus className="w-4 h-4" />
           </Button>
         </div>
@@ -699,17 +703,21 @@ This portfolio uses the ${selectedTemplateData?.name} template.
 
         {!exportComplete ? (
           <Card
-            className={`${isPortfolioComplete ? "bg-green-50 border-green-200" : "bg-yellow-50 border-yellow-200"}`}
+            className={`${isPortfolioComplete ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800" : "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700"}`}
           >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                {isPortfolioComplete ? "Ready to Export!" : "Portfolio Status"}
+              <CardTitle className={`flex items-center gap-2 ${isPortfolioComplete ? "text-emerald-800 dark:text-emerald-300" : "text-amber-800 dark:text-amber-300"}`}>
+                {isPortfolioComplete ? (
+                  <CheckCircle className="w-5 h-5" />
+                ) : (
+                  <AlertCircle className="w-5 h-5" />
+                )}
+                {isPortfolioComplete ? "🎉 Ready to Launch!" : "📝 Portfolio Checklist"}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className={isPortfolioComplete ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400"}>
                 {isPortfolioComplete
-                  ? "Your portfolio is complete and ready to be generated."
-                  : "Complete all sections to unlock export options."}
+                  ? "Congratulations! Your portfolio is complete and ready to go live."
+                  : "Complete the following steps to create your professional portfolio."}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -718,14 +726,14 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                   <Button
                     onClick={() => handleExport("download")}
                     disabled={isExporting}
-                    className="h-auto p-4 flex flex-col items-start gap-2"
+                    className="h-auto p-4 flex flex-col items-start gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                   >
                     <div className="flex items-center gap-2">
                       <Monitor className="w-5 h-5" />
-                      <span className="font-semibold">Download ZIP</span>
+                      <span className="font-semibold">Download Portfolio</span>
                     </div>
                     <span className="text-sm opacity-90 text-left">
-                      Get a complete Next.js project ready for deployment
+                      Get complete Next.js project files for self-hosting
                     </span>
                     {isExporting && exportType === "download" && <div className="text-xs">Generating files...</div>}
                   </Button>
@@ -733,26 +741,89 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                   <Button
                     onClick={() => handleExport("deploy")}
                     disabled={isExporting}
-                    variant="outline"
-                    className="h-auto p-4 flex flex-col items-start gap-2"
+                    variant="secondary"
+                    className="h-auto p-4 flex flex-col items-start gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
                     <div className="flex items-center gap-2">
                       <Settings className="w-5 h-5" />
-                      <span className="font-semibold">Deploy to Vercel</span>
+                      <span className="font-semibold">Deploy to Cloud</span>
                     </div>
-                    <span className="text-sm opacity-90 text-left">Automatically deploy your portfolio online</span>
+                    <span className="text-sm opacity-90 text-left">Instantly publish your portfolio online</span>
                     {isExporting && exportType === "deploy" && <div className="text-xs">Deploying...</div>}
                   </Button>
                 </div>
               ) : (
-                <div className="text-sm text-muted-foreground">
-                  <p className="mb-2">To complete your portfolio, please:</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    {!personalInfo.name && <li>Add your personal information</li>}
-                    {experiences.length === 0 && <li>Add at least one work experience</li>}
-                    {projects.length === 0 && <li>Add at least one project</li>}
-                    {skills.length === 0 && <li>Add your technical skills</li>}
-                  </ul>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Required Information
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className={`flex items-center gap-2 ${personalInfo.name && personalInfo.title && personalInfo.bio ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                          {personalInfo.name && personalInfo.title && personalInfo.bio ? (
+                            <CheckCircle className="w-3 h-3" />
+                          ) : (
+                            <Circle className="w-3 h-3" />
+                          )}
+                          Personal information
+                        </div>
+                        <div className={`flex items-center gap-2 ${experiences.length > 0 ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                          {experiences.length > 0 ? (
+                            <CheckCircle className="w-3 h-3" />
+                          ) : (
+                            <Circle className="w-3 h-3" />
+                          )}
+                          Work experience
+                        </div>
+                        <div className={`flex items-center gap-2 ${projects.length > 0 ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                          {projects.length > 0 ? (
+                            <CheckCircle className="w-3 h-3" />
+                          ) : (
+                            <Circle className="w-3 h-3" />
+                          )}
+                          Projects showcase
+                        </div>
+                        <div className={`flex items-center gap-2 ${skills.length > 0 ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                          {skills.length > 0 ? (
+                            <CheckCircle className="w-3 h-3" />
+                          ) : (
+                            <Circle className="w-3 h-3" />
+                          )}
+                          Technical skills
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Zap className="w-4 h-4" />
+                        Progress Overview
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Completion</span>
+                          <span className="font-medium">
+                            {Math.round(((personalInfo.name && personalInfo.title && personalInfo.bio ? 1 : 0) +
+                            (experiences.length > 0 ? 1 : 0) +
+                            (projects.length > 0 ? 1 : 0) +
+                            (skills.length > 0 ? 1 : 0)) / 4 * 100)}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                            style={{
+                              width: `${((personalInfo.name && personalInfo.title && personalInfo.bio ? 1 : 0) +
+                              (experiences.length > 0 ? 1 : 0) +
+                              (projects.length > 0 ? 1 : 0) +
+                              (skills.length > 0 ? 1 : 0)) / 4 * 100}%`
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -762,14 +833,39 @@ This portfolio uses the ${selectedTemplateData?.name} template.
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-800">
                 <Settings className="w-5 h-5" />
-                Export Complete!
+                Portfolio Complete!
               </CardTitle>
               <CardDescription className="text-green-700">
-                Your portfolio has been successfully {exportType === "download" ? "downloaded" : "deployed"}.
+                Your portfolio has been successfully created and is now live!
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                {portfolioUrl && (
+                  <div className="p-4 bg-white rounded-lg border">
+                    <h4 className="font-semibold mb-2">Your Portfolio is Live:</h4>
+                    <div className="flex items-center gap-2">
+                      <code className="bg-gray-100 px-2 py-1 rounded text-sm flex-1">
+                        {portfolioUrl}
+                      </code>
+                      <Button 
+                        size="sm" 
+                        onClick={() => window.open(portfolioUrl, '_blank')}
+                        className="flex items-center gap-1"
+                      >
+                        <Monitor className="w-3 h-3" />
+                        Visit
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => navigator.clipboard.writeText(portfolioUrl)}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="p-4 bg-white rounded-lg border">
                   <h4 className="font-semibold mb-2">What's included:</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
@@ -780,9 +876,20 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                     <li>• Ready for deployment to any hosting platform</li>
                   </ul>
                 </div>
-                <Button onClick={resetExport} variant="outline" className="w-full bg-transparent">
-                  Create Another Portfolio
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={resetExport} variant="secondary" className="flex-1 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                    Create Another Portfolio
+                  </Button>
+                  {portfolioUrl && (
+                    <Button 
+                      onClick={() => window.open(portfolioUrl, '_blank')}
+                      className="flex-1"
+                    >
+                      <Monitor className="w-4 h-4 mr-2" />
+                      View Portfolio
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -792,13 +899,29 @@ This portfolio uses the ${selectedTemplateData?.name} template.
   }
 
   const renderTemplateStep = () => (
-    <div className="space-y-6">
+    <div 
+      className="space-y-6"
+      onClick={(e) => {
+        // If clicked on the container background (not on any child elements), deselect template
+        if (e.target === e.currentTarget) {
+          setSelectedTemplate("")
+        }
+      }}
+    >
       <div className="text-center">
         <h3 className="text-2xl font-bold mb-2">Choose Your Template</h3>
         <p className="text-muted-foreground">Select a template that best represents your professional style</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div 
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        onClick={(e) => {
+          // If clicked on the grid container itself (not on a card), deselect template
+          if (e.target === e.currentTarget) {
+            setSelectedTemplate("")
+          }
+        }}
+      >
         {templates.map((template) => (
           <Card
             key={template.id}
@@ -807,7 +930,10 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                 ? "ring-2 ring-primary border-primary shadow-lg"
                 : "hover:border-primary/50"
             }`}
-            onClick={() => setSelectedTemplate(template.id)}
+            onClick={(e) => {
+              e.stopPropagation() // Prevent the grid's onClick from firing
+              setSelectedTemplate(template.id)
+            }}
           >
             <div className={`h-32 rounded-t-lg ${template.color} relative overflow-hidden`}>
               <img
@@ -878,7 +1004,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                     <div className="text-sm text-muted-foreground">{scheme.description}</div>
                   </div>
                   {customization.colorScheme === scheme.id && (
-                    <Badge variant="default" size="sm">
+                    <Badge variant="default" className="text-xs">
                       Selected
                     </Badge>
                   )}
@@ -914,7 +1040,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                     <div className="text-sm text-muted-foreground">{font.description}</div>
                   </div>
                   {customization.fontFamily === font.id && (
-                    <Badge variant="default" size="sm">
+                    <Badge variant="default" className="text-xs">
                       Selected
                     </Badge>
                   )}
@@ -948,7 +1074,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                   <div className={`w-8 h-8 rounded-full ${color.color} mx-auto mb-2`}></div>
                   <div className="text-sm font-medium">{color.name}</div>
                   {customization.accentColor === color.id && (
-                    <Badge variant="default" size="sm" className="mt-1">
+                    <Badge variant="default" className="mt-1 text-xs">
                       Selected
                     </Badge>
                   )}
@@ -984,7 +1110,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                     <div className="text-sm text-muted-foreground">{layout.description}</div>
                   </div>
                   {customization.layout === layout.id && (
-                    <Badge variant="default" size="sm">
+                    <Badge variant="default" className="text-xs">
                       Selected
                     </Badge>
                   )}
@@ -1134,14 +1260,35 @@ This portfolio uses the ${selectedTemplateData?.name} template.
 
   const nextStep = () => {
     if (currentStep === 0 && !selectedTemplate) return
-    if (currentStep < steps.length - 1) {
+    
+    if (currentStep === steps.length - 1) {
+      // This is the Complete button click
+      handlePortfolioCompletion()
+    } else if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
+      // Scroll to top of the page
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
+  }
+
+  const handlePortfolioCompletion = () => {
+    // Generate a unique portfolio URL
+    const portfolioId = Date.now().toString()
+    const generatedUrl = `https://${personalInfo.name.toLowerCase().replace(/\s+/g, '-')}-portfolio-${portfolioId}.portfoliocraft.com`
+    
+    setPortfolioUrl(generatedUrl)
+    setIsCompleted(true)
+    setExportComplete(true)
+    
+    // Scroll to top to show the completion message
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1)
+      // Scroll to top of the page
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -1217,7 +1364,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
 
           {/* Navigation */}
           <div className="flex justify-between">
-            <Button onClick={prevStep} disabled={currentStep === 0} variant="outline">
+            <Button onClick={prevStep} disabled={currentStep === 0} variant="secondary" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50">
               Previous
             </Button>
             <Button onClick={nextStep} disabled={currentStep === steps.length - 1 || !canProceed()}>

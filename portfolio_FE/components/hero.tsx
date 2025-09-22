@@ -23,7 +23,7 @@ export function Hero() {
               <Mail className="mr-2 h-4 w-4" />
               Get In Touch
             </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto bg-transparent">
+            <Button variant="secondary" size="lg" className="w-full sm:w-auto border-primary text-primary hover:bg-primary hover:text-primary-foreground">
               <ExternalLink className="mr-2 h-4 w-4" />
               View Resume
             </Button>
