@@ -17,6 +17,12 @@ import {
   Sparkles
 } from "lucide-react"
 
+// Helper function to get the correct image path based on environment
+const getImagePath = (imageName: string) => {
+  const basePath = process.env.NODE_ENV === 'production' ? '/Portfolio-builder' : ''
+  return `${basePath}/${imageName}`
+}
+
 export default function LandingPage() {
   const features = [
     {
@@ -161,7 +167,7 @@ export default function LandingPage() {
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer">
                   <div className="relative">
                     <img 
-                      src="/Portfolio-builder/modern-portfolio-template-with-dark-theme-and-clea.jpg" 
+                      src={getImagePath("modern-portfolio-template-with-dark-theme-and-clea.jpg")} 
                       alt="Modern Portfolio Template"
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -181,7 +187,7 @@ export default function LandingPage() {
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer">
                   <div className="relative">
                     <img 
-                      src="/Portfolio-builder/minimal-portfolio-template-with-white-background-a.jpg" 
+                      src={getImagePath("minimal-portfolio-template-with-white-background-a.jpg")} 
                       alt="Minimal Portfolio Template"
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -201,7 +207,7 @@ export default function LandingPage() {
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer">
                   <div className="relative">
                     <img 
-                      src="/Portfolio-builder/creative-portfolio-template-with-colorful-design-a.jpg" 
+                      src={getImagePath("creative-portfolio-template-with-colorful-design-a.jpg")} 
                       alt="Creative Portfolio Template"
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -221,7 +227,7 @@ export default function LandingPage() {
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer">
                   <div className="relative">
                     <img 
-                      src="/Portfolio-builder/professional-portfolio-template-with-corporate-des.jpg" 
+                      src={getImagePath("professional-portfolio-template-with-corporate-des.jpg")} 
                       alt="Professional Portfolio Template"
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />

@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production'
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -11,8 +13,11 @@ const nextConfig = {
   },
   output: 'export',
   trailingSlash: true,
-  basePath: '/Portfolio-builder',
-  assetPrefix: '/Portfolio-builder',
+  // Only use basePath and assetPrefix for production builds (GitHub Pages)
+  ...(isProd && {
+    basePath: '/Portfolio-builder',
+    assetPrefix: '/Portfolio-builder',
+  }),
 }
 
 export default nextConfig
