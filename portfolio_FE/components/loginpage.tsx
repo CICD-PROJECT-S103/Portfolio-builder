@@ -12,8 +12,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-2 sm:p-4 bg-background text-foreground">
-      <div className="w-full max-w-2xl mx-auto">
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 lg:p-6 bg-background text-foreground">
+      <div className="w-full max-w-sm sm:max-w-md lg:max-w-2xl mx-auto">
         <style>{`
           .text-login-heading,
           .text-login-link,
@@ -52,9 +52,9 @@ const LoginPage = () => {
         `}</style>
         
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-login-heading mb-4">Log In</h1>
-          <p className="text-foreground">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-login-heading mb-3 sm:mb-4">Log In</h1>
+          <p className="text-sm sm:text-base text-foreground">
             Don't have an account?{" "}
             <a
               href="#"
@@ -71,12 +71,12 @@ const LoginPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start w-full">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-16 items-start w-full">
           {/* Left Column - Email Login */}
-          <div className="flex-1 w-full md:w-1/2">
-            <div className="space-y-4 w-full">
+          <div className="flex-1 w-full lg:w-1/2">
+            <div className="space-y-3 sm:space-y-4 w-full">
               <div>
-                <label htmlFor="email" className="text-sm text-muted-foreground mb-2 block">
+                <label htmlFor="email" className="text-xs sm:text-sm text-muted-foreground mb-2 block">
                   Email
                 </label>
                 <Input
