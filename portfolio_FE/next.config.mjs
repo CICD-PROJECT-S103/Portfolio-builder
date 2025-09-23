@@ -12,7 +12,7 @@ const nextConfig = {
   output: 'export',
   trailingSlash: true,
   basePath: '/Portfolio-builder',
-  assetPrefix: '/Portfolio-builder/',
+  assetPrefix: '/Portfolio-builder',
 }
 
 export default nextConfig
