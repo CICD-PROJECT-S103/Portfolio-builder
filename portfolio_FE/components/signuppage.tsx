@@ -2,6 +2,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SocialButton } from "@/components/ui/social-button";
+import Link from "next/link";
 import { useState } from "react";
 
 const SignupPage = () => {
@@ -55,9 +56,9 @@ const SignupPage = () => {
           <h1 className="text-4xl font-bold text-signup-heading mb-4">Sign Up</h1>
           <p className="text-foreground">
             Already have an account?{' '}
-            <a href="/login" className="text-signup-link hover:underline">
+            <Link href="/login" className="text-signup-link hover:underline">
               Log In
-            </a>
+            </Link>
           </p>
         </div>
 
@@ -166,6 +167,22 @@ const SignupPage = () => {
                 variant="outline"
                 className="w-full h-12 mt-8 text-signup-link border-signup-link hover:bg-signup-link/5"
                 style={{ minWidth: 0 }}
+                onClick={() => {
+                  // Simulate successful signup - set authentication token
+                  // In a real app, this would come from your API response
+                  localStorage.setItem('authToken', 'demo-auth-token-' + Date.now())
+                  localStorage.setItem('userData', JSON.stringify({
+                    email: email,
+                    name: name,
+                    signupTime: new Date().toISOString()
+                  }))
+                  
+                  // Dispatch custom event for navbar to update
+                  window.dispatchEvent(new CustomEvent('authStateChange'))
+                  
+                  // Redirect to dashboard after successful signup
+                  window.location.href = '/dashboard'
+                }}
               >
                 Create Account
               </Button>

@@ -10,6 +10,18 @@ const PasswordPage = () => {
   const router = useRouter();
 
   const handleContinueClick = () => {
+    // Simulate successful login - set authentication token
+    // In a real app, this would come from your API response
+    localStorage.setItem('authToken', 'demo-auth-token-' + Date.now())
+    localStorage.setItem('userData', JSON.stringify({
+      email: 'user@example.com',
+      name: 'Demo User',
+      loginTime: new Date().toISOString()
+    }))
+    
+    // Dispatch custom event for navbar to update
+    window.dispatchEvent(new CustomEvent('authStateChange'))
+    
     router.push("/dashboard");
   };
 
