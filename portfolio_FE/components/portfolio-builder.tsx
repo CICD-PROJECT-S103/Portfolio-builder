@@ -12,6 +12,7 @@ import { ModernTemplate } from "../components/portfolio-templates/modern-templat
 import { MinimalTemplate } from "../components/portfolio-templates/minimal-template"
 import { CreativeTemplate } from "../components/portfolio-templates/creative-template"
 import { ProfessionalTemplate } from "../components/portfolio-templates/professional-template"
+import { getImagePath } from "@/lib/image-utils"
 
 interface PersonalInfo {
   name: string
@@ -107,7 +108,7 @@ export function PortfolioBuilder() {
       id: "modern",
       name: "Modern Developer",
       description: "Clean, contemporary design with bold typography and smooth animations",
-      preview: "/modern-portfolio-template-with-dark-theme-and-clea.jpg",
+      preview: getImagePath("/modern-portfolio-template-with-dark-theme-and-clea.jpg"),
       style: "modern",
       color: "bg-gradient-to-br from-blue-600 to-purple-600",
     },
@@ -115,7 +116,7 @@ export function PortfolioBuilder() {
       id: "minimal",
       name: "Minimal Professional",
       description: "Simple, elegant layout focusing on content and readability",
-      preview: "/minimal-portfolio-template-with-white-background-a.jpg",
+      preview: getImagePath("/minimal-portfolio-template-with-white-background-a.jpg"),
       style: "minimal",
       color: "bg-gradient-to-br from-gray-600 to-gray-800",
     },
@@ -123,7 +124,7 @@ export function PortfolioBuilder() {
       id: "creative",
       name: "Creative Showcase",
       description: "Vibrant, artistic design perfect for designers and creative professionals",
-      preview: "/creative-portfolio-template-with-colorful-design-a.jpg",
+      preview: getImagePath("/creative-portfolio-template-with-colorful-design-a.jpg"),
       style: "creative",
       color: "bg-gradient-to-br from-pink-500 to-orange-500",
     },
@@ -131,7 +132,7 @@ export function PortfolioBuilder() {
       id: "professional",
       name: "Corporate Professional",
       description: "Traditional, business-focused design ideal for corporate environments",
-      preview: "/professional-portfolio-template-with-corporate-des.jpg",
+      preview: getImagePath("/professional-portfolio-template-with-corporate-des.jpg"),
       style: "professional",
       color: "bg-gradient-to-br from-slate-600 to-slate-800",
     },
@@ -937,7 +938,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
           >
             <div className={`h-32 rounded-t-lg ${template.color} relative overflow-hidden`}>
               <img
-                src={template.preview || "/placeholder.svg"}
+                src={template.preview || getImagePath("/placeholder.svg")}
                 alt={template.name}
                 className="w-full h-full object-cover opacity-80"
               />

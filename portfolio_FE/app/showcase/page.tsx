@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ExternalLink, Star, Eye, Github } from "lucide-react"
+import { getImagePath } from "@/lib/image-utils"
 
 export default function Showcase() {
   const showcaseItems = [
@@ -9,7 +10,7 @@ export default function Showcase() {
       name: "Sarah Chen",
       title: "UX Designer",
       template: "Creative Showcase",
-      image: "/placeholder-user.jpg",
+      image: getImagePath("/placeholder-user.jpg"),
       portfolio: "https://sarahchen.portfoliocraft.com",
       description: "A vibrant portfolio showcasing innovative UX/UI designs and case studies",
       tags: ["UX Design", "Creative", "Case Studies"],
@@ -19,7 +20,7 @@ export default function Showcase() {
       name: "Marcus Rodriguez",
       title: "Full Stack Developer",
       template: "Modern Developer",
-      image: "/placeholder-user.jpg",
+      image: getImagePath("/placeholder-user.jpg"),
       portfolio: "https://marcus.dev",
       description: "Clean, modern portfolio highlighting full-stack development projects",
       tags: ["React", "Node.js", "Full Stack"],
@@ -29,7 +30,7 @@ export default function Showcase() {
       name: "Emily Watson",
       title: "Product Manager",
       template: "Professional",
-      image: "/placeholder-user.jpg",
+      image: getImagePath("/placeholder-user.jpg"),
       portfolio: "https://emilywatson.pro",
       description: "Professional portfolio showcasing product management expertise",
       tags: ["Product Management", "Strategy", "Leadership"],
@@ -39,7 +40,7 @@ export default function Showcase() {
       name: "Alex Kim",
       title: "Data Scientist",
       template: "Minimal Professional",
-      image: "/placeholder-user.jpg",
+      image: getImagePath("/placeholder-user.jpg"),
       portfolio: "https://alexkim.data",
       description: "Minimal design focusing on data science projects and insights",
       tags: ["Data Science", "Python", "Machine Learning"],
@@ -49,7 +50,7 @@ export default function Showcase() {
       name: "Jennifer Lopez",
       title: "Marketing Director",
       template: "Creative Showcase",
-      image: "/placeholder-user.jpg",
+      image: getImagePath("/placeholder-user.jpg"),
       portfolio: "https://jlopez.marketing",
       description: "Dynamic portfolio showcasing marketing campaigns and strategies",
       tags: ["Marketing", "Branding", "Campaigns"],
@@ -59,7 +60,7 @@ export default function Showcase() {
       name: "David Park",
       title: "DevOps Engineer",
       template: "Modern Developer",
-      image: "/placeholder-user.jpg",
+      image: getImagePath("/placeholder-user.jpg"),
       portfolio: "https://davidpark.cloud",
       description: "Technical portfolio highlighting DevOps and cloud infrastructure work",
       tags: ["DevOps", "AWS", "Kubernetes"],
