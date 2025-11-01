@@ -1,5 +1,6 @@
 package com.klu.backend.model;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,5 +41,9 @@ public class TechnicalManager {
 
         tsr.deleteById(id);
         return "200::Skill deleted successfully.";
+    }
+    
+    public List<TechincalSkills> getSkillsByEmail(String email) {
+        return tsr.findByPersonalInfoEmail(email);
     }
 }

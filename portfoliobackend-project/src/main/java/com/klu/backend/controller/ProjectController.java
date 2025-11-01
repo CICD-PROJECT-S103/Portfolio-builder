@@ -1,13 +1,17 @@
 package com.klu.backend.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.klu.backend.model.ProjectInfo;
@@ -40,6 +44,16 @@ public class ProjectController {
 	        return ResponseEntity.status(404).body(response);
 	    }
 	    return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/list")
+	public ResponseEntity<?> getProjects(@RequestParam String email) {
+	    try {
+	        List<ProjectInfo> projects = PM.getProjectsByEmail(email);
+	        return ResponseEntity.ok(projects);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body("500::Error retrieving projects - " + e.getMessage());
+	    }
 	}
 
 }

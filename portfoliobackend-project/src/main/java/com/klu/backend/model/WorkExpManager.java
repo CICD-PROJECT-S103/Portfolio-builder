@@ -1,5 +1,6 @@
 package com.klu.backend.model;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +39,9 @@ public class WorkExpManager {
 
         we.deleteById(id);
         return "200::Work Experience deleted successfully.";
+    }
+    
+    public List<WorkExperince> getWorkExperiencesByEmail(String email) {
+        return we.findByPersonalInfoEmail(email);
     }
 }

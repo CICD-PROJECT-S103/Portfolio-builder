@@ -11,10 +11,13 @@ public class PersonalInfoManager {
 	PersonalInfoRepository pr;
 	public String adddetail(PersonalInfo p) 
 	{
-		if(pr.validateEmail(p.getEmail())>0)
-			return "401::email id exist";
-		
-		pr.save(p);
+		// Remove validation - allow updating existing personal info
+		// This enables users to edit their portfolio
+		pr.save(p); // save() will update if email exists, insert if new
 		return "200::Information added successfully";
+	}
+	
+	public PersonalInfo getByEmail(String email) {
+		return pr.findById(email).orElse(null);
 	}
 }

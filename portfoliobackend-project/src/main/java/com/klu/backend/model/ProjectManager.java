@@ -1,4 +1,5 @@
 package com.klu.backend.model;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,5 +39,9 @@ public class ProjectManager {
 
         pror.deleteById(id);
         return "200::Project deleted successfully.";
+    }
+    
+    public List<ProjectInfo> getProjectsByEmail(String email) {
+        return pror.findByPersonalInfoEmail(email);
     }
 }

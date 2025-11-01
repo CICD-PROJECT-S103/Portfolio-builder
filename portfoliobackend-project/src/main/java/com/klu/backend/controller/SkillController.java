@@ -1,5 +1,7 @@
 package com.klu.backend.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +35,15 @@ public class SkillController {
             return ResponseEntity.status(404).body(response);
         }
         return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/list")
+    public ResponseEntity<?> getSkills(@RequestParam String email) {
+        try {
+            List<TechincalSkills> skills = technicalSkillManager.getSkillsByEmail(email);
+            return ResponseEntity.ok(skills);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("500::Error retrieving skills - " + e.getMessage());
+        }
     }
 }

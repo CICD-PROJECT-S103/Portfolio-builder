@@ -3,13 +3,20 @@
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Palette, User, UserPlus, LogOut } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 export function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { isAuthenticated, logout, user } = useAuth()
   const isDashboard = pathname === "/dashboard"
-  const showLogout = pathname === "/dashboard" || pathname === "/templates" || pathname === "/about"
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/")
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -27,6 +34,11 @@ export function Navbar() {
 
           {/* Navigation Links */}
           <div className={`hidden md:flex items-center gap-6 ${isDashboard ? 'absolute left-1/2 transform -translate-x-1/2' : ''}`}>
+            {isAuthenticated && (
+              <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                Dashboard
+              </Link>
+            )}
             <Link href="/features" className="text-muted-foreground hover:text-foreground transition-colors">
               Features
             </Link>
@@ -41,7 +53,7 @@ export function Navbar() {
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            {!showLogout && (
+            {!isAuthenticated ? (
               <>
                 <Link href="/login">
                   <Button variant="ghost" size="sm" className="hidden sm:flex">
@@ -56,14 +68,23 @@ export function Navbar() {
                   </Button>
                 </Link>
               </>
-            )}
-            {showLogout && (
-              <Link href="/">
-                <Button variant="ghost" size="sm" className="flex items-center">
+            ) : (
+              <>
+                {user && (
+                  <span className="hidden sm:inline text-sm text-muted-foreground">
+                    Welcome, {user.fullname}
+                  </span>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex items-center"
+                  onClick={handleLogout}
+                >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
-              </Link>
+              </>
             )}
           </div>
         </div>
