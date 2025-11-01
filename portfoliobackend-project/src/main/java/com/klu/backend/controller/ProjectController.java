@@ -3,6 +3,8 @@ package com.klu.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,4 +33,13 @@ public class ProjectController {
             return ResponseEntity.status(500).body("500::Internal Server Error - " + e.getMessage());
         }
     }
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> deleteProject(@PathVariable Long id) {
+	    String response = PM.deleteProject(id);
+	    if (response.startsWith("404")) {
+	        return ResponseEntity.status(404).body(response);
+	    }
+	    return ResponseEntity.ok(response);
+	}
+
 }

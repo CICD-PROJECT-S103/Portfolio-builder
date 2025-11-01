@@ -1,5 +1,5 @@
 package com.klu.backend.model;
-
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,5 +27,16 @@ public class ProjectManager {
 
         pror.save(p);
         return "200::Project added successfully.";
+    }
+    
+    public String deleteProject(Long id) {
+        Optional<ProjectInfo> existingProject = pror.findById(id);
+
+        if (existingProject.isEmpty()) {
+            return "404::Project not found with ID: " + id;
+        }
+
+        pror.deleteById(id);
+        return "200::Project deleted successfully.";
     }
 }

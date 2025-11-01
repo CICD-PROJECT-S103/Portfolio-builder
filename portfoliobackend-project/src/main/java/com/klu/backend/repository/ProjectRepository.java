@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.klu.backend.model.ProjectInfo;
 
 @Repository
-public interface ProjectRepository extends JpaRepository<ProjectInfo,String>{
+public interface ProjectRepository extends JpaRepository<ProjectInfo,Long>{
 
 }

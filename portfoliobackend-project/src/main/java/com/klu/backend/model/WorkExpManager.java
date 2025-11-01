@@ -1,5 +1,7 @@
 package com.klu.backend.model;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,4 +29,14 @@ public class WorkExpManager {
         we.save(w);
         return "200::Work Experience added successfully.";
 	}
+	public String deleteWorkExperience(Long id) {
+        Optional<WorkExperince> existingExp = we.findById(id);
+
+        if (existingExp.isEmpty()) {
+            return "404::Work Experience not found with ID: " + id;
+        }
+
+        we.deleteById(id);
+        return "200::Work Experience deleted successfully.";
+    }
 }
