@@ -29,9 +29,12 @@ CREATE TABLE personalinfo (
     professionalbio VARCHAR(2000),
     githubprofile VARCHAR(255),
     linkedinprofile VARCHAR(255),
-    portfolio_id BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    -- Optional: add a normalized email column and unique index to enforce case-insensitive uniqueness.
+    -- DO NOT enable the unique index until you've resolved duplicates (see checks below).
+    -- email_normalized is computed (lowercase + trimmed) to make uniqueness case-insensitive.
+    email_normalized VARCHAR(255) AS (LOWER(TRIM(email))) STORED,
     INDEX idx_email (email)
 );
 
@@ -41,26 +44,34 @@ SELECT email, fullname, professionaltitle, phonenumber, location, personalwebsit
        CONCAT(fullname, '''s Portfolio') as portfolio_name
 FROM personalinfo_backup;
 
+-- IMPORTANT: Check for duplicate emails before adding any UNIQUE constraint on email.
+-- If duplicates exist, decide how to merge or keep one. Run the query below and fix duplicates first.
+SELECT email, COUNT(*) AS cnt
+FROM personalinfo
+GROUP BY LOWER(TRIM(email))
+HAVING cnt > 1;
+
 -- Step 5: Update projects to use personalinfo ID instead of email
 ALTER TABLE projects ADD COLUMN personalinfo_id BIGINT AFTER id;
 
--- Map projects to personalinfo using email
+-- Map projects to personalinfo using a direct join on normalized email for safety.
+-- This handles case/whitespace differences between old and new data.
 UPDATE projects p
-INNER JOIN personalinfo pi ON p.email = (SELECT email FROM personalinfo_backup WHERE email = pi.email LIMIT 1)
+JOIN personalinfo pi ON LOWER(TRIM(p.email)) = LOWER(TRIM(pi.email))
 SET p.personalinfo_id = pi.id;
 
 -- Step 6: Update work_experince to use personalinfo ID
 ALTER TABLE work_experince ADD COLUMN personalinfo_id BIGINT AFTER id;
 
 UPDATE work_experince w
-INNER JOIN personalinfo pi ON w.email = (SELECT email FROM personalinfo_backup WHERE email = pi.email LIMIT 1)
+JOIN personalinfo pi ON LOWER(TRIM(w.email)) = LOWER(TRIM(pi.email))
 SET w.personalinfo_id = pi.id;
 
 -- Step 7: Update skills to use personalinfo ID
 ALTER TABLE skills ADD COLUMN personalinfo_id BIGINT AFTER id;
 
 UPDATE skills s
-INNER JOIN personalinfo pi ON s.email = (SELECT email FROM personalinfo_backup WHERE email = pi.email LIMIT 1)
+JOIN personalinfo pi ON LOWER(TRIM(s.email)) = LOWER(TRIM(pi.email))
 SET s.personalinfo_id = pi.id;
 
 -- Step 8: Add foreign key constraints with personalinfo_id
