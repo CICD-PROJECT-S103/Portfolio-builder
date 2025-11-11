@@ -7,6 +7,7 @@ import { Suspense } from "react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/contexts/auth-context"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -30,12 +31,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main className="flex-1">
-            <Suspense fallback={null}>{children}</Suspense>
-          </main>
-          <Footer />
-          <Analytics />
+          <AuthProvider>
+            <Navbar />
+            <main className="flex-1">
+              <Suspense fallback={null}>{children}</Suspense>
+            </main>
+            <Footer />
+            <Analytics />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

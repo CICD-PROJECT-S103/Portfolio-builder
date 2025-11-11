@@ -4,12 +4,74 @@ import { Button } from "@/components/ui/button";
 import { SocialButton } from "@/components/ui/social-button";
 import Link from "next/link";
 import { useState } from "react";
+import { authApi, SignupData } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
 const SignupPage = () => {
+  const router = useRouter();
+  const { login } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    // Validation
+    if (!name || !email || !password || !confirmPassword) {
+      setError("All fields are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const signupData: SignupData = {
+        fullname: name,
+        email: email,
+        password: password,
+      };
+
+      const response = await authApi.signup(signupData);
+
+      if (response.success) {
+        setSuccess("Account created successfully! Signing you in...");
+        
+        // Auto-login after successful signup
+        const loginResponse = await authApi.signin({ email, password });
+        
+        if (loginResponse.success) {
+          login(email, name);
+          setTimeout(() => {
+            router.push("/builder");
+          }, 1000);
+        }
+      } else {
+        setError(response.message || "Signup failed. Please try again.");
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred during signup");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-2 sm:p-4 bg-background text-foreground">
@@ -163,28 +225,26 @@ const SignupPage = () => {
                 />
               </div>
               
+              {error && (
+                <div className="p-3 rounded-md bg-red-50 border border-red-200">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
+              {success && (
+                <div className="p-3 rounded-md bg-green-50 border border-green-200">
+                  <p className="text-sm text-green-600">{success}</p>
+                </div>
+              )}
+
               <Button
                 variant="outline"
                 className="w-full h-12 mt-8 text-signup-link border-signup-link hover:bg-signup-link/5"
                 style={{ minWidth: 0 }}
-                onClick={() => {
-                  // Simulate successful signup - set authentication token
-                  // In a real app, this would come from your API response
-                  localStorage.setItem('authToken', 'demo-auth-token-' + Date.now())
-                  localStorage.setItem('userData', JSON.stringify({
-                    email: email,
-                    name: name,
-                    signupTime: new Date().toISOString()
-                  }))
-                  
-                  // Dispatch custom event for navbar to update
-                  window.dispatchEvent(new CustomEvent('authStateChange'))
-                  
-                  // Redirect to dashboard after successful signup
-                  window.location.href = '/dashboard'
-                }}
+                onClick={handleSignup}
+                disabled={isLoading}
               >
-                Create Account
+                {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </div>
           </div>

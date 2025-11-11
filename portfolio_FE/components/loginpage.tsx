@@ -3,12 +3,56 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SocialButton } from "@/components/ui/social-button";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { authApi } from "@/lib/api";
+import { useAuth } from "@/contexts/auth-context";
 
 const LoginPage = () => {
   const router = useRouter();
-  
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleContinueClick = () => {
-    router.push("/password");
+    if (email) {
+      setShowPassword(true);
+    } else {
+      setError("Please enter your email address");
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await authApi.signin({ email, password });
+
+      if (response.success) {
+        // Get user's fullname from localStorage or use email as fallback
+        const storedUser = localStorage.getItem('user');
+        const fullname = storedUser ? JSON.parse(storedUser).fullname : email.split('@')[0];
+        
+        login(email, fullname);
+        router.push("/builder");
+      } else {
+        setError(response.message || "Invalid email or password");
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred during login");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -83,6 +127,9 @@ const LoginPage = () => {
                   className="w-full"
                   id="email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={showPassword}
                   style={{
                     flex: 1,
                     padding: "12px 16px",
@@ -96,21 +143,65 @@ const LoginPage = () => {
                   }}
                 />
               </div>
+
+              {showPassword && (
+                <div>
+                  <label htmlFor="password" className="text-sm text-muted-foreground mb-2 block">
+                    Password
+                  </label>
+                  <Input
+                    className="w-full"
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleLogin(e)}
+                    style={{
+                      flex: 1,
+                      padding: "12px 16px",
+                      border: "1px solid #2563eb",
+                      borderRadius: 6,
+                      fontSize: 16,
+                      outline: 'none',
+                      background: 'var(--input, #eee)',
+                      color: 'var(--foreground, #111)',
+                      zIndex: 2
+                    }}
+                  />
+                </div>
+              )}
               
               <div className="text-left">
                 <a href="#" className="text-sm text-foreground hover:underline">
-                  Forgot Email?
+                  {showPassword ? "Forgot Password?" : "Forgot Email?"}
                 </a>
               </div>
+
+              {error && (
+                <div className="p-3 rounded-md bg-red-50 border border-red-200">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
               
               <Button
                 variant="outline"
                 className="w-full h-12 mt-8 text-login-link border-login-link hover:bg-login-link/5"
-                onClick={handleContinueClick}
+                onClick={showPassword ? handleLogin : handleContinueClick}
+                disabled={isLoading}
                 style={{ minWidth: 0 }}
               >
-                Continue with Email →
+                {isLoading ? "Logging in..." : showPassword ? "Log In" : "Continue with Email →"}
               </Button>
+
+              {showPassword && (
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => { setShowPassword(false); setPassword(""); setError(""); }}
+                >
+                  ← Back to Email
+                </Button>
+              )}
             </div>
           </div>
 

@@ -1,18 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { User, Briefcase, Code, FileText, Eye, Palette, Monitor, Settings, Plus, X, CheckCircle, AlertCircle, Circle, Zap } from "lucide-react"
+import { User, Briefcase, Code, FileText, Eye, Palette, Monitor, Settings, Plus, X, CheckCircle, AlertCircle, Circle, Zap, RefreshCw } from "lucide-react"
 import { ModernTemplate } from "../components/portfolio-templates/modern-template"
 import { MinimalTemplate } from "../components/portfolio-templates/minimal-template"
 import { CreativeTemplate } from "../components/portfolio-templates/creative-template"
 import { ProfessionalTemplate } from "../components/portfolio-templates/professional-template"
-import { getImagePath } from "@/lib/image-utils"
+import { useAuth } from "@/contexts/auth-context"
+import { personalInfoApi, projectsApi, workExperienceApi, skillsApi } from "@/lib/api"
 
 interface PersonalInfo {
   name: string
@@ -62,6 +63,7 @@ interface TemplateCustomization {
 }
 
 export function PortfolioBuilder() {
+  const { user } = useAuth()
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedTemplate, setSelectedTemplate] = useState<string>("")
   const [isExporting, setIsExporting] = useState(false)
@@ -69,6 +71,10 @@ export function PortfolioBuilder() {
   const [exportType, setExportType] = useState<"download" | "deploy" | null>(null)
   const [portfolioUrl, setPortfolioUrl] = useState<string>("")
   const [isCompleted, setIsCompleted] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState("")
+  const [isLoadingSavedData, setIsLoadingSavedData] = useState(false)
+  const [hasSavedData, setHasSavedData] = useState(false)
   const [customization, setCustomization] = useState<TemplateCustomization>({
     colorScheme: "default",
     fontFamily: "inter",
@@ -93,6 +99,17 @@ export function PortfolioBuilder() {
   const [skills, setSkills] = useState<string[]>([])
   const [newSkill, setNewSkill] = useState("")
 
+  // Initialize email and name from user context when available
+  useEffect(() => {
+    if (user && !personalInfo.email) {
+      setPersonalInfo(prev => ({
+        ...prev,
+        name: user.fullname || prev.name,
+        email: user.email || prev.email,
+      }))
+    }
+  }, [user])
+
   const steps = [
     { title: "Template", icon: Palette },
     { title: "Customize", icon: Settings },
@@ -108,7 +125,7 @@ export function PortfolioBuilder() {
       id: "modern",
       name: "Modern Developer",
       description: "Clean, contemporary design with bold typography and smooth animations",
-      preview: getImagePath("/modern-portfolio-template-with-dark-theme-and-clea.jpg"),
+      preview: "/modern-portfolio-template-with-dark-theme-and-clea.jpg",
       style: "modern",
       color: "bg-gradient-to-br from-blue-600 to-purple-600",
     },
@@ -116,7 +133,7 @@ export function PortfolioBuilder() {
       id: "minimal",
       name: "Minimal Professional",
       description: "Simple, elegant layout focusing on content and readability",
-      preview: getImagePath("/minimal-portfolio-template-with-white-background-a.jpg"),
+      preview: "/minimal-portfolio-template-with-white-background-a.jpg",
       style: "minimal",
       color: "bg-gradient-to-br from-gray-600 to-gray-800",
     },
@@ -124,7 +141,7 @@ export function PortfolioBuilder() {
       id: "creative",
       name: "Creative Showcase",
       description: "Vibrant, artistic design perfect for designers and creative professionals",
-      preview: getImagePath("/creative-portfolio-template-with-colorful-design-a.jpg"),
+      preview: "/creative-portfolio-template-with-colorful-design-a.jpg",
       style: "creative",
       color: "bg-gradient-to-br from-pink-500 to-orange-500",
     },
@@ -132,7 +149,7 @@ export function PortfolioBuilder() {
       id: "professional",
       name: "Corporate Professional",
       description: "Traditional, business-focused design ideal for corporate environments",
-      preview: getImagePath("/professional-portfolio-template-with-corporate-des.jpg"),
+      preview: "/professional-portfolio-template-with-corporate-des.jpg",
       style: "professional",
       color: "bg-gradient-to-br from-slate-600 to-slate-800",
     },
@@ -169,6 +186,93 @@ export function PortfolioBuilder() {
     { id: "grid", name: "Grid", description: "Card-based grid layout" },
     { id: "timeline", name: "Timeline", description: "Chronological timeline layout" },
   ]
+
+  // Check for saved data on component mount
+  useEffect(() => {
+    const checkForSavedData = async () => {
+      if (!user?.email) return
+      
+      try {
+        const personalRes = await personalInfoApi.get(user.email)
+        if (personalRes.success && personalRes.data) {
+          setHasSavedData(true)
+        }
+      } catch (error) {
+        console.error('Error checking for saved data:', error)
+      }
+    }
+    
+    checkForSavedData()
+  }, [user])
+
+  // Function to load saved portfolio data
+  const loadSavedData = async () => {
+    if (!user?.email) return
+    
+    setIsLoadingSavedData(true)
+    try {
+      const [personalRes, projectsRes, experiencesRes, skillsRes] = await Promise.all([
+        personalInfoApi.get(user.email),
+        projectsApi.list(user.email),
+        workExperienceApi.list(user.email),
+        skillsApi.list(user.email)
+      ])
+
+      // Load personal info
+      if (personalRes.success && personalRes.data) {
+        const data = personalRes.data
+        setPersonalInfo({
+          name: data.fullname || '',
+          title: data.professionalTitle || '',
+          email: data.email || user.email,
+          phone: data.phoneNumber || '',
+          location: data.location || '',
+          bio: data.professionalBio || '',
+          github: data.githubProfile || '',
+          linkedin: data.linkedinProfile || '',
+          website: data.personalWebsite || '',
+        })
+      }
+
+      // Load projects
+      if (projectsRes.success && projectsRes.data) {
+        const loadedProjects = projectsRes.data.map((p: any) => ({
+          id: p.id?.toString() || Date.now().toString(),
+          title: p.title || '',
+          description: p.description || '',
+          technologies: p.technologies ? p.technologies.split(',').map((t: string) => t.trim()) : [],
+          liveUrl: p.liveUrl || '',
+          githubUrl: p.githubUrl || '',
+        }))
+        setProjects(loadedProjects)
+      }
+
+      // Load experiences
+      if (experiencesRes.success && experiencesRes.data) {
+        const loadedExperiences = experiencesRes.data.map((e: any) => ({
+          id: e.id?.toString() || Date.now().toString(),
+          company: e.company || '',
+          position: e.position || '',
+          duration: e.duration || '',
+          description: e.description || '',
+        }))
+        setExperiences(loadedExperiences)
+      }
+
+      // Load skills
+      if (skillsRes.success && skillsRes.data) {
+        const loadedSkills = skillsRes.data.map((s: any) => s.skillName || '')
+        setSkills(loadedSkills)
+      }
+
+      console.log('Saved data loaded successfully!')
+    } catch (error) {
+      console.error('Error loading saved data:', error)
+      setSaveError('Failed to load saved data')
+    } finally {
+      setIsLoadingSavedData(false)
+    }
+  }
 
   const addProject = () => {
     const newProject: Project = {
@@ -312,13 +416,89 @@ This portfolio uses the ${selectedTemplateData?.name} template.
     }
   }
 
+  const saveToBackend = async () => {
+    if (!user?.email) {
+      setSaveError("User not authenticated")
+      return false
+    }
+
+    setIsSaving(true)
+    setSaveError("")
+
+    try {
+      // 1. Save Personal Info
+      const personalInfoResponse = await personalInfoApi.add({
+        email: user.email,
+        fullname: personalInfo.name,
+        professionalTitle: personalInfo.title,
+        phoneNumber: personalInfo.phone,
+        location: personalInfo.location,
+        personalWebsite: personalInfo.website,
+        professionalBio: personalInfo.bio,
+        githubProfile: personalInfo.github,
+        linkedinProfile: personalInfo.linkedin,
+      })
+
+      if (!personalInfoResponse.success) {
+        throw new Error(personalInfoResponse.message)
+      }
+
+      // 2. Save Projects
+      for (const project of projects) {
+        await projectsApi.add({
+          personalInfo: { email: user.email },
+          title: project.title,
+          description: project.description,
+          liveUrl: project.liveUrl,
+          githubUrl: project.githubUrl,
+          technologies: project.technologies.join(", "),
+        })
+      }
+
+      // 3. Save Work Experiences
+      for (const exp of experiences) {
+        await workExperienceApi.add({
+          personalInfo: { email: user.email },
+          company: exp.company,
+          position: exp.position,
+          duration: exp.duration,
+          description: exp.description,
+        })
+      }
+
+      // 4. Save Skills
+      for (const skill of skills) {
+        await skillsApi.add({
+          personalInfo: { email: user.email },
+          skillName: skill,
+          proficiencyLevel: "Intermediate", // Default level, can be customized
+        })
+      }
+
+      return true
+    } catch (error: any) {
+      console.error("Save to backend failed:", error)
+      setSaveError(error.message || "Failed to save portfolio data")
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleExport = async (type: "download" | "deploy") => {
     setIsExporting(true)
     setExportType(type)
 
     try {
-      // Simulate export process
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      // First save to backend
+      const saveSuccess = await saveToBackend()
+      
+      if (!saveSuccess) {
+        throw new Error("Failed to save portfolio data")
+      }
+
+      // Simulate additional export process
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
       if (type === "download") {
         // Generate files and create download
@@ -343,6 +523,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
       setExportComplete(true)
     } catch (error) {
       console.error("Export failed:", error)
+      setSaveError("Export failed. Please try again.")
     } finally {
       setIsExporting(false)
     }
@@ -722,11 +903,16 @@ This portfolio uses the ${selectedTemplateData?.name} template.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {saveError && (
+                <div className="p-4 rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+                </div>
+              )}
               {isPortfolioComplete ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button
                     onClick={() => handleExport("download")}
-                    disabled={isExporting}
+                    disabled={isExporting || isSaving}
                     className="h-auto p-4 flex flex-col items-start gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                   >
                     <div className="flex items-center gap-2">
@@ -736,7 +922,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                     <span className="text-sm opacity-90 text-left">
                       Get complete Next.js project files for self-hosting
                     </span>
-                    {isExporting && exportType === "download" && <div className="text-xs">Generating files...</div>}
+                    {isExporting && exportType === "download" && <div className="text-xs">{isSaving ? "Saving data..." : "Generating files..."}</div>}
                   </Button>
 
                   <Button
@@ -833,18 +1019,30 @@ This portfolio uses the ${selectedTemplateData?.name} template.
           <Card className="bg-green-50 border-green-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-800">
-                <Settings className="w-5 h-5" />
-                Portfolio Complete!
+                <CheckCircle className="w-5 h-5" />
+                Portfolio Complete & Saved!
               </CardTitle>
               <CardDescription className="text-green-700">
-                Your portfolio has been successfully created and is now live!
+                Your portfolio has been successfully saved to the database. All your information is now stored securely and can be edited later.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <h4 className="font-semibold text-green-800 dark:text-green-400">Data Saved Successfully</h4>
+                  </div>
+                  <ul className="text-sm text-green-700 dark:text-green-300 space-y-1 ml-7">
+                    <li>✓ Personal Information</li>
+                    <li>✓ Work Experience ({experiences.length} item{experiences.length !== 1 ? 's' : ''})</li>
+                    <li>✓ Projects ({projects.length} item{projects.length !== 1 ? 's' : ''})</li>
+                    <li>✓ Skills ({skills.length} item{skills.length !== 1 ? 's' : ''})</li>
+                  </ul>
+                </div>
                 {portfolioUrl && (
-                  <div className="p-4 bg-white rounded-lg border">
-                    <h4 className="font-semibold mb-2">Your Portfolio is Live:</h4>
+                  <div className="p-4 bg-white dark:bg-card rounded-lg border">
+                    <h4 className="font-semibold mb-2">Your Portfolio Preview:</h4>
                     <div className="flex items-center gap-2">
                       <code className="bg-gray-100 px-2 py-1 rounded text-sm flex-1">
                         {portfolioUrl}
@@ -867,7 +1065,14 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                     </div>
                   </div>
                 )}
-                <div className="p-4 bg-white rounded-lg border">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-semibold mb-2 text-blue-800 dark:text-blue-400">💡 Want to Edit Your Portfolio?</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    Your data is saved in the database. You can come back anytime to edit your information, 
+                    add more projects, update work experience, or change your template.
+                  </p>
+                </div>
+                <div className="p-4 bg-white dark:bg-card rounded-lg border">
                   <h4 className="font-semibold mb-2">What's included:</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Complete Next.js project structure</li>
@@ -899,46 +1104,29 @@ This portfolio uses the ${selectedTemplateData?.name} template.
     )
   }
 
-  const renderTemplateStep = () => (
-    <div 
-      className="space-y-6"
-      onClick={(e) => {
-        // If clicked on the container background (not on any child elements), deselect template
-        if (e.target === e.currentTarget) {
-          setSelectedTemplate("")
-        }
-      }}
-    >
-      <div className="text-center">
-        <h3 className="text-2xl font-bold mb-2">Choose Your Template</h3>
-        <p className="text-muted-foreground">Select a template that best represents your professional style</p>
-      </div>
+  const renderTemplateStep = () => {
+    console.log("Rendering template step. Templates count:", templates.length);
+    return (
+      <div className="space-y-6 w-full">
+        <div className="text-center">
+          <h3 className="text-2xl font-bold mb-2">Choose Your Template</h3>
+          <p className="text-muted-foreground">Select a template that best represents your professional style</p>
+        </div>
 
-      <div 
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        onClick={(e) => {
-          // If clicked on the grid container itself (not on a card), deselect template
-          if (e.target === e.currentTarget) {
-            setSelectedTemplate("")
-          }
-        }}
-      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         {templates.map((template) => (
-          <Card
+          <div
             key={template.id}
-            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+            className={`cursor-pointer transition-all duration-200 hover:shadow-lg border rounded-lg overflow-hidden ${
               selectedTemplate === template.id
                 ? "ring-2 ring-primary border-primary shadow-lg"
-                : "hover:border-primary/50"
+                : "border-border hover:border-primary/50"
             }`}
-            onClick={(e) => {
-              e.stopPropagation() // Prevent the grid's onClick from firing
-              setSelectedTemplate(template.id)
-            }}
+            onClick={() => setSelectedTemplate(template.id)}
           >
-            <div className={`h-32 rounded-t-lg ${template.color} relative overflow-hidden`}>
+            <div className={`h-32 ${template.color} relative overflow-hidden`}>
               <img
-                src={template.preview || getImagePath("/placeholder.svg")}
+                src={template.preview || "/placeholder.svg"}
                 alt={template.name}
                 className="w-full h-full object-cover opacity-80"
               />
@@ -950,24 +1138,25 @@ This portfolio uses the ${selectedTemplateData?.name} template.
                 </div>
               )}
             </div>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                {template.name}
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-lg">{template.name}</h4>
                 {selectedTemplate === template.id && <Badge variant="default">Selected</Badge>}
-              </CardTitle>
-              <CardDescription>{template.description}</CardDescription>
-            </CardHeader>
-          </Card>
+              </div>
+              <p className="text-sm text-muted-foreground">{template.description}</p>
+            </div>
+          </div>
         ))}
       </div>
 
-      {!selectedTemplate && (
-        <div className="text-center py-4">
-          <p className="text-muted-foreground">Please select a template to continue</p>
-        </div>
-      )}
-    </div>
-  )
+        {!selectedTemplate && (
+          <div className="text-center py-4">
+            <p className="text-muted-foreground">Please select a template to continue</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const renderCustomizeStep = () => (
     <div className="space-y-6">
@@ -1167,6 +1356,41 @@ This portfolio uses the ${selectedTemplateData?.name} template.
         <p className="text-muted-foreground">Tell us about yourself to create a compelling introduction</p>
       </div>
 
+      {/* Load Saved Data Button */}
+      {hasSavedData && !personalInfo.title && !personalInfo.bio && (
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                  📁 Saved Portfolio Data Found
+                </h4>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  We found your previously saved portfolio. Click to load all your details, projects, experiences, and skills.
+                </p>
+              </div>
+              <Button 
+                onClick={loadSavedData} 
+                disabled={isLoadingSavedData}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isLoadingSavedData ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Load All Data
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="name">Full Name *</Label>
@@ -1272,17 +1496,39 @@ This portfolio uses the ${selectedTemplateData?.name} template.
     }
   }
 
-  const handlePortfolioCompletion = () => {
-    // Generate a unique portfolio URL
-    const portfolioId = Date.now().toString()
-    const generatedUrl = `https://${personalInfo.name.toLowerCase().replace(/\s+/g, '-')}-portfolio-${portfolioId}.portfoliocraft.com`
-    
-    setPortfolioUrl(generatedUrl)
-    setIsCompleted(true)
-    setExportComplete(true)
-    
-    // Scroll to top to show the completion message
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  const handlePortfolioCompletion = async () => {
+    if (!user?.email) {
+      setSaveError("User not authenticated. Please login again.")
+      return
+    }
+
+    setIsSaving(true)
+    setSaveError("")
+
+    try {
+      // Save all portfolio data to backend
+      const saveSuccess = await saveToBackend()
+      
+      if (!saveSuccess) {
+        return // Error already set in saveToBackend
+      }
+
+      // Generate a unique portfolio URL
+      const portfolioId = Date.now().toString()
+      const generatedUrl = `https://${personalInfo.name.toLowerCase().replace(/\s+/g, '-')}-portfolio-${portfolioId}.portfoliocraft.com`
+      
+      setPortfolioUrl(generatedUrl)
+      setIsCompleted(true)
+      setExportComplete(true)
+      
+      // Scroll to top to show the completion message
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (error: any) {
+      console.error("Portfolio completion failed:", error)
+      setSaveError(error.message || "Failed to complete portfolio")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const prevStep = () => {
@@ -1351,25 +1597,37 @@ This portfolio uses the ${selectedTemplateData?.name} template.
           </div>
 
           {/* Step Content */}
-          <Card className="mb-8">
-            <CardContent className="p-8">
-              {currentStep === 0 && renderTemplateStep()}
-              {currentStep === 1 && renderCustomizeStep()}
-              {currentStep === 2 && renderPersonalInfoStep()}
-              {currentStep === 3 && renderExperienceStep()}
-              {currentStep === 4 && renderProjectsStep()}
-              {currentStep === 5 && renderSkillsStep()}
-              {currentStep === 6 && renderPreviewStep()}
-            </CardContent>
-          </Card>
+          <div className="bg-card border rounded-xl shadow-sm p-8 mb-8">
+            {currentStep === 0 && renderTemplateStep()}
+            {currentStep === 1 && renderCustomizeStep()}
+            {currentStep === 2 && renderPersonalInfoStep()}
+            {currentStep === 3 && renderExperienceStep()}
+            {currentStep === 4 && renderProjectsStep()}
+            {currentStep === 5 && renderSkillsStep()}
+            {currentStep === 6 && renderPreviewStep()}
+          </div>
 
           {/* Navigation */}
           <div className="flex justify-between">
-            <Button onClick={prevStep} disabled={currentStep === 0} variant="secondary" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50">
+            <Button 
+              onClick={prevStep} 
+              disabled={currentStep === 0 || isSaving} 
+              variant="secondary" 
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+            >
               Previous
             </Button>
-            <Button onClick={nextStep} disabled={currentStep === steps.length - 1 || !canProceed()}>
-              {currentStep === steps.length - 1 ? "Complete" : "Next"}
+            <Button 
+              onClick={nextStep} 
+              disabled={(currentStep === steps.length - 1 && exportComplete) || !canProceed() || isSaving}
+              className="min-w-[120px]"
+            >
+              {isSaving ? (
+                <>
+                  <span className="mr-2">Saving...</span>
+                  <span className="animate-spin">⏳</span>
+                </>
+              ) : currentStep === steps.length - 1 ? "Complete & Save" : "Next"}
             </Button>
           </div>
         </div>
