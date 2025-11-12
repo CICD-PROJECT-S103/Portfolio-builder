@@ -12,6 +12,7 @@
   },
   "homepage": "https://CICD-PROJECT-S103.github.io/Portfolio-builder",
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
