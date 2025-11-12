@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Search, Book, MessageCircle, Video, FileText, HelpCircle } from "lucide-react"
+import { Search, Book, MessageCircle, Video, FileText } from "lucide-react"
 
 export default function HelpCenter() {
   const helpCategories = [
@@ -141,23 +140,7 @@ export default function HelpCenter() {
         </div>
       </div>
 
-      {/* Contact Support */}
-      <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-8 text-center">
-        <HelpCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-        <h2 className="text-2xl font-bold mb-4">Still Need Help?</h2>
-        <p className="text-muted-foreground mb-6">
-          Can't find what you're looking for? Our support team is here to help
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Button variant="secondary" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Live Chat
-          </Button>
-          <Button>
-            Contact Support
-          </Button>
-        </div>
-      </div>
+      {/* Support CTA removed per request */}
     </div>
   )
 }
