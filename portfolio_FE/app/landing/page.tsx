@@ -3,6 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Vortex } from "@/components/ui/vortex"
+import { useTheme } from "next-themes"
+import * as React from "react"
 import Link from "next/link"
 import { 
   ArrowRight, 
@@ -24,6 +27,10 @@ const getImagePath = (imageName: string) => {
 }
 
 export default function LandingPage() {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
   const features = [
     {
       icon: Palette,
@@ -86,15 +93,22 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Full-page Vortex background in dark mode */}
+      {mounted && isDark && (
+        <div className="fixed inset-0 -z-10">
+          <Vortex backgroundColor="black" containerClassName="h-full w-full" />
+        </div>
+      )}
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+  <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:bg-transparent dark:bg-none">
         <div className="container mx-auto px-4 py-20 lg:py-32">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Build Your Dream Portfolio in Minutes
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed dark:text-white/90">
               Create stunning, professional portfolios that showcase your skills and help you land your dream job. 
               No coding required.
             </p>
@@ -106,7 +120,7 @@ export default function LandingPage() {
                 </Button>
               </Link>
               <Link href="/templates">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 dark:border-white/30 dark:text-white dark:hover:bg-white/10">
                   View Examples
                 </Button>
               </Link>
@@ -116,7 +130,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800">
+  <section className="py-20 bg-gray-50 dark:bg-transparent">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
@@ -147,7 +161,7 @@ export default function LandingPage() {
       </section>
 
       {/* Templates Section */}
-      <section className="py-20 bg-white dark:bg-gray-900">
+  <section className="py-20 bg-white dark:bg-transparent">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
@@ -279,7 +293,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white dark:bg-transparent">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Ready to Build Your Portfolio?
