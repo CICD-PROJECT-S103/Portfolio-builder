@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { 
@@ -16,7 +15,6 @@ import {
   Instagram,
   Palette,
   Heart,
-  Star,
   Users,
   Shield,
   HelpCircle
@@ -25,7 +23,6 @@ import { useState } from "react"
 
 export function Footer() {
   const [email, setEmail] = useState("")
-  const [feedback, setFeedback] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -39,16 +36,7 @@ export function Footer() {
     }, 1000)
   }
 
-  const handleFeedbackSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setFeedback("")
-      // You can add toast notification here
-    }, 1000)
-  }
+  
 
   return (
     <footer className="bg-background border-t border-border">
@@ -149,8 +137,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Contact & Feedback Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 pt-8 border-t border-border">
+  {/* Contact Section */}
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 pt-8 border-t border-border">
           
           {/* Contact Information */}
           <Card>
@@ -193,40 +181,7 @@ export function Footer() {
             </CardContent>
           </Card>
 
-          {/* Feedback Form */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Star className="w-5 h-5" />
-                Send Feedback
-              </h3>
-              <form onSubmit={handleFeedbackSubmit} className="space-y-4">
-                <Textarea
-                  placeholder="Tell us what you think about PortfolioCraft..."
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  required
-                  rows={4}
-                  className="resize-none"
-                />
-                <Button 
-                  type="submit" 
-                  size="sm" 
-                  disabled={isSubmitting}
-                  className="w-full"
-                >
-                  {isSubmitting ? (
-                    "Sending..."
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Feedback
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          
         </div>
 
         {/* Bottom Footer */}

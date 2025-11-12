@@ -27,6 +27,8 @@ export default function ContactUs() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Anchor for in-page navigation from CTAs */}
+            <div id="send-message" className="scroll-mt-24" />
             <ContactFormClient serviceId={serviceId} templateId={templateId} publicKey={publicKey} />
             <div className="text-center mt-3 text-sm text-muted-foreground">
               Or email us directly at
@@ -102,21 +104,23 @@ export default function ContactUs() {
             </CardContent>
           </Card>
 
-          {/* Live Chat */}
+          {/* Send Feedback */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" />
-                Live Chat
+                Send Feedback
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Need immediate help? Chat with our support team for real-time assistance.
+                Tell us what you think about PortfolioCraft. Have ideas, requests, or found a bug? We’d love to hear from you.
               </p>
-              <Button className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground" variant="secondary">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Start Live Chat
+              <Button asChild className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground" variant="secondary">
+                <a href="#send-message">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Send Feedback
+                </a>
               </Button>
             </CardContent>
           </Card>
@@ -131,8 +135,8 @@ export default function ContactUs() {
             <CardContent className="p-6">
               <h3 className="font-semibold mb-2">How quickly will I receive a response?</h3>
               <p className="text-muted-foreground text-sm">
-                We aim to respond to all inquiries within 24 hours during business days. 
-                For urgent issues, please use our live chat feature.
+                We aim to respond to all inquiries within 24 hours during business days.
+                For urgent issues, please use our contact form for the fastest response.
               </p>
             </CardContent>
           </Card>
