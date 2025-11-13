@@ -1,63 +1,107 @@
-'use client';
+'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authApi } from '@/lib/api';
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import {
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+  type User as FirebaseUser,
+} from 'firebase/auth'
+import { auth } from '@/lib/firebase'
+import { removeAuthToken, setAuthToken } from '@/lib/api'
 
 interface User {
-  email: string;
-  fullname: string;
+  uid: string
+  email: string | null
+  fullname: string
+  photoURL?: string | null
 }
 
 interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, fullname: string) => void;
-  logout: () => Promise<void>;
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  signInWithEmail: (email: string, password: string) => Promise<void>
+  signUpWithEmail: (fullname: string, email: string, password: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
+  logout: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+const transformUser = (firebaseUser: FirebaseUser): User => {
+  const fallbackName = firebaseUser.email?.split('@')[0] ?? 'User'
+
+  return {
+    uid: firebaseUser.uid,
+    email: firebaseUser.email,
+    fullname: firebaseUser.displayName?.trim() || fallbackName,
+    photoURL: firebaseUser.photoURL ?? undefined,
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is authenticated on mount
-    const checkAuth = () => {
-      if (authApi.isAuthenticated()) {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          try {
-            setUser(JSON.parse(storedUser));
-          } catch (error) {
-            console.error('Failed to parse stored user:', error);
-            localStorage.removeItem('user');
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          const [token] = await Promise.all([firebaseUser.getIdToken()])
+          if (token) {
+            setAuthToken(token)
           }
+
+          const authUser = transformUser(firebaseUser)
+          setUser(authUser)
+          localStorage.setItem('user', JSON.stringify(authUser))
+        } else {
+          setUser(null)
+          removeAuthToken()
+          localStorage.removeItem('user')
         }
+      } catch (error) {
+        console.error('Authentication state handling failed:', error)
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false);
-    };
+    })
 
-    checkAuth();
-  }, []);
+    return () => unsubscribe()
+  }, [])
 
-  const login = (email: string, fullname: string) => {
-    const userData = { email, fullname };
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-  };
+  const signInWithEmail = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password)
+  }
+
+  const signUpWithEmail = async (fullname: string, email: string, password: string) => {
+    const credentials = await createUserWithEmailAndPassword(auth, email, password)
+
+    if (fullname.trim()) {
+      await updateProfile(credentials.user, { displayName: fullname })
+    }
+  }
+
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: 'select_account' })
+    await signInWithPopup(auth, provider)
+  }
 
   const logout = async () => {
     try {
-      await authApi.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
+      await signOut(auth)
     } finally {
-      setUser(null);
-      localStorage.removeItem('user');
+      setUser(null)
+      removeAuthToken()
+      localStorage.removeItem('user')
     }
-  };
+  }
 
   return (
     <AuthContext.Provider
@@ -65,19 +109,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAuthenticated: !!user,
         isLoading,
-        login,
+        signInWithEmail,
+        signUpWithEmail,
+        signInWithGoogle,
         logout,
       }}
     >
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider')
   }
-  return context;
+  return context
 }

@@ -72,7 +72,7 @@ export function Navbar() {
               <>
                 {user && (
                   <span className="hidden sm:inline text-sm text-muted-foreground">
-                    Welcome, {user.fullname}
+                    Welcome, {user.fullname || user.email || "there"}
                   </span>
                 )}
                 <Button 
