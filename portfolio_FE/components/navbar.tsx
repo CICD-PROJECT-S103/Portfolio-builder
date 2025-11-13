@@ -23,7 +23,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 py-3 relative">
         <div className={`flex items-center ${isDashboard ? 'justify-between' : 'justify-between'}`}>
           {/* Logo/Brand */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/landing" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Palette className="w-5 h-5 text-white" />
             </div>
@@ -72,7 +72,7 @@ export function Navbar() {
               <>
                 {user && (
                   <span className="hidden sm:inline text-sm text-muted-foreground">
-                    Welcome, {user.fullname}
+                    Welcome, {user.fullname || user.email || "there"}
                   </span>
                 )}
                 <Button 

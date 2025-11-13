@@ -1,11 +1,13 @@
+import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Mail, Phone, MapPin, MessageCircle, Clock, Send } from "lucide-react"
+import { ContactFormClient } from "@/components/contact-form-client"
 
 export default function ContactUs() {
+  const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_3bxel59"
+  const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+  const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
@@ -25,58 +27,14 @@ export default function ContactUs() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name *</Label>
-                  <Input id="firstName" placeholder="John" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name *</Label>
-                  <Input id="lastName" placeholder="Doe" required />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
-                <Input id="email" type="email" placeholder="john@example.com" required />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject *</Label>
-                <Input id="subject" placeholder="How can we help you?" required />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <select 
-                  id="category" 
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
-                >
-                  <option value="">Select a category</option>
-                  <option value="general">General Inquiry</option>
-                  <option value="technical">Technical Support</option>
-                  <option value="billing">Billing & Accounts</option>
-                  <option value="feature">Feature Request</option>
-                  <option value="bug">Bug Report</option>
-                </select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="message">Message *</Label>
-                <Textarea 
-                  id="message" 
-                  placeholder="Please describe your question or issue in detail..."
-                  rows={6}
-                  required 
-                />
-              </div>
-              
-              <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                <Send className="w-4 h-4 mr-2" />
-                Send Message
-              </Button>
-            </form>
+            {/* Anchor for in-page navigation from CTAs */}
+            <div id="send-message" className="scroll-mt-24" />
+            <ContactFormClient serviceId={serviceId} templateId={templateId} publicKey={publicKey} />
+            <div className="text-center mt-3 text-sm text-muted-foreground">
+              Or email us directly at
+              {" "}
+              <a className="underline" href="mailto:2300033535@kluniversity.in">2300033535@kluniversity.in</a>
+            </div>
           </CardContent>
         </Card>
 
@@ -92,7 +50,7 @@ export default function ContactUs() {
                 <Mail className="w-5 h-5 text-primary mt-1" />
                 <div>
                   <h3 className="font-semibold">Email</h3>
-                  <p className="text-muted-foreground">2300030442@kluniversity</p>
+                  <p className="text-muted-foreground">2300033535@kluniversity.in</p>
                   <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
                 </div>
               </div>
@@ -146,21 +104,23 @@ export default function ContactUs() {
             </CardContent>
           </Card>
 
-          {/* Live Chat */}
+          {/* Send Feedback */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" />
-                Live Chat
+                Send Feedback
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Need immediate help? Chat with our support team for real-time assistance.
+                Tell us what you think about PortfolioCraft. Have ideas, requests, or found a bug? We’d love to hear from you.
               </p>
-              <Button className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground" variant="secondary">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Start Live Chat
+              <Button asChild className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground" variant="secondary">
+                <a href="#send-message">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Send Feedback
+                </a>
               </Button>
             </CardContent>
           </Card>
@@ -175,8 +135,8 @@ export default function ContactUs() {
             <CardContent className="p-6">
               <h3 className="font-semibold mb-2">How quickly will I receive a response?</h3>
               <p className="text-muted-foreground text-sm">
-                We aim to respond to all inquiries within 24 hours during business days. 
-                For urgent issues, please use our live chat feature.
+                We aim to respond to all inquiries within 24 hours during business days.
+                For urgent issues, please use our contact form for the fastest response.
               </p>
             </CardContent>
           </Card>

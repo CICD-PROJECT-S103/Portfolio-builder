@@ -2,14 +2,15 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SocialButton } from "@/components/ui/social-button";
+import Link from "next/link";
 import { useState } from "react";
-import { authApi, SignupData } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { FirebaseError } from "firebase/app";
 
 const SignupPage = () => {
   const router = useRouter();
-  const { login } = useAuth();
+  const { signUpWithEmail, signInWithGoogle } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,31 +43,46 @@ const SignupPage = () => {
     setIsLoading(true);
 
     try {
-      const signupData: SignupData = {
-        fullname: name,
-        email: email,
-        password: password,
-      };
-
-      const response = await authApi.signup(signupData);
-
-      if (response.success) {
-        setSuccess("Account created successfully! Signing you in...");
-        
-        // Auto-login after successful signup
-        const loginResponse = await authApi.signin({ email, password });
-        
-        if (loginResponse.success) {
-          login(email, name);
-          setTimeout(() => {
-            router.push("/builder");
-          }, 1000);
-        }
+      await signUpWithEmail(name, email, password);
+      setSuccess("Account created successfully! Redirecting you to the builder...");
+      setTimeout(() => router.push("/builder"), 1000);
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        setError(getFriendlyErrorMessage(err.code));
       } else {
-        setError(response.message || "Signup failed. Please try again.");
+        setError("An unexpected error occurred during signup.");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during signup");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getFriendlyErrorMessage = (code: string) => {
+    const messages: Record<string, string> = {
+      "auth/email-already-in-use": "An account with this email already exists.",
+      "auth/invalid-email": "Please enter a valid email address.",
+      "auth/weak-password": "Password must be at least 6 characters.",
+      "auth/popup-closed-by-user": "The sign-in window was closed before completion.",
+      "auth/cancelled-popup-request": "The sign-in request was cancelled. Please try again.",
+    };
+
+    return messages[code] || "We couldn't create your account. Please try again.";
+  };
+
+  const handleGoogleSignup = async () => {
+    setError("");
+    setSuccess("");
+    setIsLoading(true);
+
+    try {
+      await signInWithGoogle();
+      router.push("/builder");
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        setError(getFriendlyErrorMessage(err.code));
+      } else {
+        setError("Google sign-up failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +133,9 @@ const SignupPage = () => {
           <h1 className="text-4xl font-bold text-signup-heading mb-4">Sign Up</h1>
           <p className="text-foreground">
             Already have an account?{' '}
-            <a href="/login" className="text-signup-link hover:underline">
+            <Link href="/login" className="text-signup-link hover:underline">
               Log In
-            </a>
+            </Link>
           </p>
         </div>
 
@@ -258,6 +274,8 @@ const SignupPage = () => {
             <SocialButton
               variant="google"
               className="flex items-center justify-center gap-3 social-button"
+              onClick={handleGoogleSignup}
+              disabled={isLoading}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -279,32 +297,6 @@ const SignupPage = () => {
               </svg>
               Continue with Google
             </SocialButton>
-
-            <SocialButton
-              variant="facebook"
-              className="flex items-center justify-center gap-3 social-button"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Continue with Facebook
-            </SocialButton>
-
-            <SocialButton
-              variant="apple"
-              className="flex items-center justify-center gap-3 social-button"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-              </svg>
-              Continue with Apple
-            </SocialButton>
-
-            <div className="text-center mt-6">
-              <a href="#" className="text-signup-link hover:underline text-sm">
-                Continue with SSO
-              </a>
-            </div>
           </div>
         </div>
 

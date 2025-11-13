@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { SocialButton } from "@/components/ui/social-button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { authApi } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
+import { FirebaseError } from "firebase/app";
 
 const LoginPage = () => {
   const router = useRouter();
-  const { login } = useAuth();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +24,21 @@ const LoginPage = () => {
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const getFriendlyErrorMessage = (code: string) => {
+    const messages: Record<string, string> = {
+      "auth/invalid-credential": "Invalid email or password.",
+      "auth/user-not-found": "No account found with that email.",
+      "auth/wrong-password": "Incorrect password. Please try again.",
+      "auth/invalid-email": "Please enter a valid email address.",
+      "auth/too-many-requests": "Too many attempts. Please try again later.",
+      "auth/popup-closed-by-user": "The sign-in window was closed before completion.",
+      "auth/cancelled-popup-request": "The sign-in request was cancelled. Please try again.",
+    }
+
+    return messages[code] || "Unable to sign in. Please try again.";
+  }
+
+  const handleLogin = async () => {
     setError("");
 
     if (!email || !password) {
@@ -36,20 +49,32 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await authApi.signin({ email, password });
-
-      if (response.success) {
-        // Get user's fullname from localStorage or use email as fallback
-        const storedUser = localStorage.getItem('user');
-        const fullname = storedUser ? JSON.parse(storedUser).fullname : email.split('@')[0];
-        
-        login(email, fullname);
-        router.push("/builder");
+      await signInWithEmail(email, password);
+      router.push("/builder");
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        setError(getFriendlyErrorMessage(err.code));
       } else {
-        setError(response.message || "Invalid email or password");
+        setError("An unexpected error occurred during login.");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    setIsLoading(true);
+
+    try {
+      await signInWithGoogle();
+      router.push("/builder");
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        setError(getFriendlyErrorMessage(err.code));
+      } else {
+        setError("Google sign-in failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +180,7 @@ const LoginPage = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleLogin(e)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                     style={{
                       flex: 1,
                       padding: "12px 16px",
@@ -172,9 +197,13 @@ const LoginPage = () => {
               )}
               
               <div className="text-left">
-                <a href="#" className="text-sm text-foreground hover:underline">
+                <button
+                  type="button"
+                  className="text-sm text-foreground hover:underline"
+                  onClick={() => router.push("/password")}
+                >
                   {showPassword ? "Forgot Password?" : "Forgot Email?"}
-                </a>
+                </button>
               </div>
 
               {error && (
@@ -215,6 +244,8 @@ const LoginPage = () => {
             <SocialButton
               variant="google"
               className="flex items-center justify-center gap-3 social-button"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -236,32 +267,6 @@ const LoginPage = () => {
               </svg>
               Continue with Google
             </SocialButton>
-
-            <SocialButton
-              variant="facebook"
-              className="flex items-center justify-center gap-3 social-button"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Continue with Facebook
-            </SocialButton>
-
-            <SocialButton
-              variant="apple"
-              className="flex items-center justify-center gap-3 social-button"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-              </svg>
-              Continue with Apple
-            </SocialButton>
-
-            <div className="text-center mt-6">
-              <a href="#" className="text-login-link hover:underline text-sm">
-                Continue with SSO
-              </a>
-            </div>
           </div>
         </div>
 

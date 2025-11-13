@@ -14,6 +14,7 @@ import { CreativeTemplate } from "../components/portfolio-templates/creative-tem
 import { ProfessionalTemplate } from "../components/portfolio-templates/professional-template"
 import { useAuth } from "@/contexts/auth-context"
 import { personalInfoApi, projectsApi, workExperienceApi, skillsApi } from "@/lib/api"
+import { getImagePath } from "@/lib/image-utils"
 
 interface PersonalInfo {
   name: string
@@ -1126,7 +1127,7 @@ This portfolio uses the ${selectedTemplateData?.name} template.
           >
             <div className={`h-32 ${template.color} relative overflow-hidden`}>
               <img
-                src={template.preview || "/placeholder.svg"}
+                src={getImagePath(template.preview || "/placeholder.svg")}
                 alt={template.name}
                 className="w-full h-full object-cover opacity-80"
               />

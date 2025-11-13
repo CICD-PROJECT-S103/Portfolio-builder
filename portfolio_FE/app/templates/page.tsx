@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Eye, Star, Download, Code } from "lucide-react"
 import Link from "next/link"
+import { getImagePath } from "@/lib/image-utils"
 
 export default function Templates() {
   const templates = [
@@ -10,7 +11,7 @@ export default function Templates() {
       id: "modern",
       name: "Modern Developer",
       description: "Clean, contemporary design with bold typography and smooth animations",
-      preview: "/modern-portfolio-template-with-dark-theme-and-clea.jpg",
+      preview: getImagePath("/modern-portfolio-template-with-dark-theme-and-clea.jpg"),
       category: "Developer",
       rating: 4.9,
       downloads: "2.3K",
@@ -20,7 +21,7 @@ export default function Templates() {
       id: "minimal",
       name: "Minimal Professional",
       description: "Simple, elegant layout focusing on content and readability",
-      preview: "/minimal-portfolio-template-with-white-background-a.jpg",
+      preview: getImagePath("/minimal-portfolio-template-with-white-background-a.jpg"),
       category: "Professional",
       rating: 4.8,
       downloads: "1.8K",
@@ -30,7 +31,7 @@ export default function Templates() {
       id: "creative",
       name: "Creative Showcase",
       description: "Vibrant, artistic design perfect for designers and creative professionals",
-      preview: "/creative-portfolio-template-with-colorful-design-a.jpg",
+      preview: getImagePath("/creative-portfolio-template-with-colorful-design-a.jpg"),
       category: "Creative",
       rating: 4.9,
       downloads: "2.1K",
@@ -40,7 +41,7 @@ export default function Templates() {
       id: "professional",
       name: "Corporate Professional",
       description: "Traditional, business-focused design ideal for corporate environments",
-      preview: "/professional-portfolio-template-with-corporate-des.jpg",
+      preview: getImagePath("/professional-portfolio-template-with-corporate-des.jpg"),
       category: "Business",
       rating: 4.7,
       downloads: "1.5K",

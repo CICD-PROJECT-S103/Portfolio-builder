@@ -8,8 +8,6 @@ const socialButtonVariants = cva(
     variants: {
       variant: {
         google: "bg-login-google text-white hover:bg-login-google/90",
-        facebook: "bg-login-facebook text-white hover:bg-login-facebook/90",
-        apple: "bg-login-apple text-login-appleText border border-border hover:bg-login-apple/80",
       },
     },
     defaultVariants: {

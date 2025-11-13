@@ -2,13 +2,14 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, Github } from "lucide-react"
+import { getImagePath } from "@/lib/image-utils"
 
 const projects = [
   {
     title: "E-Commerce Platform",
     description:
       "A full-stack e-commerce solution with user authentication, payment processing, and admin dashboard. Built with modern technologies and optimized for performance.",
-    image: "/modern-ecommerce-interface.png",
+    image: getImagePath("/modern-ecommerce-interface.png"),
     technologies: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"],
     liveUrl: "https://example.com",
     githubUrl: "https://github.com",
@@ -17,7 +18,7 @@ const projects = [
     title: "Task Management App",
     description:
       "A collaborative task management application with real-time updates, drag-and-drop functionality, and team collaboration features.",
-    image: "/task-management-dashboard.png",
+    image: getImagePath("/task-management-dashboard.png"),
     technologies: ["React", "Node.js", "Socket.io", "MongoDB"],
     liveUrl: "https://example.com",
     githubUrl: "https://github.com",
@@ -26,7 +27,7 @@ const projects = [
     title: "Weather Dashboard",
     description:
       "A responsive weather application that provides detailed forecasts, interactive maps, and location-based weather alerts.",
-    image: "/preview/project4.png",
+    image: getImagePath("/preview/project4.png"),
     technologies: ["Vue.js", "Chart.js", "OpenWeather API", "Tailwind CSS"],
     liveUrl: "https://example.com",
     githubUrl: "https://github.com",
@@ -51,7 +52,7 @@ export function Projects() {
               <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow group">
                 <div className="aspect-video overflow-hidden">
                   <img
-                    src={project.image || "/placeholder.svg"}
+                    src={project.image || getImagePath("/placeholder.svg")}
                     alt={project.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
