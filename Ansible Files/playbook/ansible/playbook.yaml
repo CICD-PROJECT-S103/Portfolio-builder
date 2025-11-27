@@ -1,0 +1,105 @@
+
+---
+- name: Bootstrap workstation for k8sansimble deployment
+  hosts: local
+  become: true
+  vars:
+    docker_repo_key: /etc/apt/keyrings/docker.gpg
+    docker_repo: >-
+      deb [arch={{ ansible_architecture }} signed-by={{ docker_repo_key }}]
+      https://download.docker.com/linux/ubuntu
+      {{ ansible_distribution_release }} stable
+    k8s_manifest_src: ../k8s/fullstack-deployment.yaml
+    k8s_manifest_dest: /tmp/fullstack-deployment.yaml
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install base packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Ensure docker apt key directory exists
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Add Docker GPG key
+      ansible.builtin.command: >
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
+        gpg --dearmor -o {{ docker_repo_key }}
+      args:
+        creates: "{{ docker_repo_key }}"
+
+    - name: Add Docker apt repository
+      copy:
+        dest: /etc/apt/sources.list.d/docker.list
+        content: "{{ docker_repo }}\n"
+
+    - name: Install docker engine
+      apt:
+        update_cache: yes
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Enable and start docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add current user to docker group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: yes
+
+    - name: Install unzip (for kubectl/minikube helpers)
+      apt:
+        name: unzip
+        state: present
+
+    - name: Install Minikube
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: "0755"
+
+    - name: Install kubectl
+      vars:
+        kubectl_version: "{{ lookup('pipe', 'curl -L -s https://dl.k8s.io/release/stable.txt') }}"
+      get_url:
+        url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: "0755"
+
+    - name: Start Minikube with Docker driver
+      command: minikube start --driver=docker --memory=2000 --cpus=2
+      args:
+        creates: /root/.minikube
+
+    - name: Copy Kubernetes manifest
+      copy:
+        src: "{{ k8s_manifest_src }}"
+        dest: "{{ k8s_manifest_dest }}"
+        owner: "{{ ansible_user_id }}"
+        mode: "0644"
+
+    - name: Apply fullstack deployment
+      command: kubectl apply -f {{ k8s_manifest_dest }}
+
+    - name: Display service endpoints
+      command: kubectl get svc -n k8sansimble -o wide
+
