@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ronit0000/k8sansimblefe:v1
+          image: ronit0000/k8sansimblefe:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -60,13 +60,19 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ronit0000/k8sansimblebe:v1
+          image: ronit0000/k8sansimblebe:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 8058
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "default"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/Portfolio?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "root"
 ---
 apiVersion: v1
 kind: Service
@@ -81,4 +87,48 @@ spec:
     - port: 8058
       targetPort: 8058
       nodePort: 30058
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: k8sansimble
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root"
+            - name: MYSQL_DATABASE
+              value: "Portfolio"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: k8sansimble
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
 
